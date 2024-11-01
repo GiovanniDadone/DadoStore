@@ -1,15 +1,27 @@
-const { connectDB } = require('./config/db.config');
+const express = require("express");
+const mongoose = require("mongoose");
+const app = express();
+const cors = require("cors");
+require("dotenv").config();
 
-// Initialize database connection
-let db;
-async function initDB() {
-    db = await connectDB();
+// middleware
+const corsOptions = {
+    origin: "http://localhost:5137" // frontend URI (ReactJS)
 }
+app.use(express.json());
+app.use(cors(corsOptions));
 
-initDB();
+// connect MongoDB
+mongoose.connect(process.env.MONGODB_URI).then(() => {
+    const PORT = process.env.PORT || 8000
+    app.listen(PORT, () => {
+        console.log(`App is Listening on PORT ${PORT}`);
+    })
+}).catch(err => {
+    console.log(err);
+});
 
-const productRoutes = require('./routes/product.routes');
-app.use('/api', productRoutes);
-
-const cors = require('cors');
-app.use(cors());
+// route
+app.get("/", (req, res) => {
+    res.status(201).json({message: "Connected to Backend!"});
+});
